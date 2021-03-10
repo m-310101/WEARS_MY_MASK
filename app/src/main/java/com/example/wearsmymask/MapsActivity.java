@@ -7,6 +7,7 @@ import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import com.google.android.gms.location.GeofencingClient;
@@ -15,13 +16,17 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener {
 
     private GoogleMap mMap;
     private GeofencingClient geofencingClient;
+
+    private float GEOFENCE_RADIUS = 30;
 
     private int FINE_LOCATION_ACCESS_REQUEST_CODE = 10001;
 
@@ -52,11 +57,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
 
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        LatLng uni = new LatLng(51.3782, -2.3264);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(uni, 16));
 
         enableUserLocation();
+
+        mMap.setOnMapLongClickListener(this);
     }
 
     private void enableUserLocation() {
@@ -82,5 +88,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 // Permission not given
             }
         }
+    }
+
+    @Override
+    public void onMapLongClick(LatLng latLng) {
+        mMap.clear();
+        addMarker(latLng);
+        addCircle(latLng, GEOFENCE_RADIUS);
+    }
+
+    private void addMarker(LatLng latLng) {
+        MarkerOptions markerOptions = new MarkerOptions().position(latLng);
+        mMap.addMarker(markerOptions);
+    }
+
+    private void addCircle(LatLng latLng, float radius) {
+        CircleOptions circleOptions = new CircleOptions();
+        circleOptions.center(latLng);
+        circleOptions.radius(radius);
+        circleOptions.strokeColor(Color.argb(255, 255, 0, 0));
+        circleOptions.fillColor(Color.argb(64, 255, 0, 0));
+        circleOptions.strokeWidth(4);
+        mMap.addCircle(circleOptions);
     }
 }
